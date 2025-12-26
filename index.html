@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>La Belle Divas | Salão de Beleza em Salvador - Desde 2000</title>
+
+    <!-- Meta Descriptions (SEO) -->
+    <meta
+      name="description"
+      content="Realce sua beleza com quem entende. Cabelo, unhas, make e spa dos pés. Tradição e qualidade no Vale das Pedrinhas desde 2000. Agende seu horário!"
+    />
+
+    <!-- Google Fonts (Outfit & Playfair Display for elegance) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&family=Playfair+Display:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap 5.3 CDN -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Flatpickr (Data Picker) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_green.css"> <!-- Theme -->
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark-custom">
+      <div class="container">
+        <a class="navbar-brand font-playfair text-gold" href="#" id="navbar_brand">
+          La Belle Divas         </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarNav"
+        >
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" href="#hero" id="nav_home">Início</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#servicos" id="nav_services">Serviços</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#galeria" id="nav_gallery">Resultados</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#contato" id="nav_contact">Fale Conosco</a>
+            </li>
+            <!-- Admin Link (Lock Icon) -->
+            <li class="nav-item ms-lg-3">
+              <a class="nav-link text-gold" href="admin.html" title="Área Restrita">
+                <i class="bi bi-lock-fill"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="hero" class="hero-section text-center p-0 position-relative">
+      <img src="banner.png" alt="Banner Salão" class="img-fluid w-100 h-100" style="object-fit: cover;" onerror="this.src='https://placehold.co/1920x600/1A1A1A/D4AF37?text=Banner+Principal'">
+      <div class="position-absolute translate-middle-x w-100" style="bottom: -45px; left: 50%;">
+        <button 
+          type="button" 
+          class="btn btn-gold btn-lg px-5 shadow-lg" 
+          style="padding-top: 20px; padding-bottom: 20px;"
+          data-bs-toggle="modal" 
+          data-bs-target="#agendamentoModal"
+          id="hero_cta">
+          Agendar via WhatsApp
+        </button>
+      </div>
+    </header>
+
+    <!-- Serviços -->
+    <section id="servicos" class="py-5 bg-light-pink">
+      <div class="container">
+        <div class="text-center mb-5">
+          <h2 class="font-playfair section-title" id="section_services_title">Experiência que Transforma</h2>
+          <div class="separator-gold mx-auto"></div>
+        </div>
+        
+        <!-- Área de Conteúdo via PDF -->
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="ratio ratio-1x1 shadow-sm rounded border border-white" style="min-height: 500px;">
+                    <!-- Exibe o PNG se disponível, senão tenta iframe PDF -->
+                    <img 
+                        src="servicos.png" 
+                        alt="Tabela de Serviços" 
+                        class="w-100 h-100" 
+                        style="object-fit: contain;"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                    >
+                    <iframe 
+                        src="servicos.pdf" 
+                        title="Tabela de Serviços e Preços"
+                        style="border:none; display:none;"
+                        allowfullscreen
+                        class="w-100 h-100"
+                    ></iframe>
+                </div>
+                
+                <!-- Botão de Download -->
+
+            </div>
+        </div>
+
+        <!-- 
+        ANTIGA SEÇÃO DE CARDS (Mantida ocultada caso queira voltar)
+        <div class="row g-4 d-none">
+          ... (código antigo) ...
+        </div> 
+        -->
+      </div>
+    </section>
+
+    <!-- Galeria -->
+    <section id="galeria" class="py-5 bg-white">
+      <div class="container">
+        <div class="text-center mb-5">
+          <h2 class="font-playfair section-title" id="section_gallery_title">Nossas Divas</h2>
+          <p class="text-muted">
+            <span id="gallery_subtitle_prefix">Siga nosso trabalho no Instagram</span>
+            <a
+              href="https://www.instagram.com/lab.elledivas/"
+              target="_blank"
+              class="text-gold text-decoration-none"
+              id="gallery_instagram_link"
+              id="gallery_instagram_link"
+              >@lab.elledivas</a
+            >
+            <span id="gallery_subtitle_suffix">e fique por dentro das promoções.</span>
+          </p>
+          <div class="separator-gold mx-auto"></div>
+        </div>
+        <div class="row g-3">
+          <div class="col-6 col-md-4">
+            <img src="foto1.png" class="img-fluid rounded shadow-sm gallery-img w-100" alt="Galeria 1" onerror="this.src='https://placehold.co/400x400/eee/999?text=foto1.png'">
+          </div>
+          <div class="col-6 col-md-4">
+            <img src="foto2.png" class="img-fluid rounded shadow-sm gallery-img w-100" alt="Galeria 2" onerror="this.src='https://placehold.co/400x400/eee/999?text=foto2.png'">
+          </div>
+          <div class="col-6 col-md-4">
+            <img src="foto3.png" class="img-fluid rounded shadow-sm gallery-img w-100" alt="Galeria 3" onerror="this.src='https://placehold.co/400x400/eee/999?text=foto3.png'">
+          </div>
+          <div class="col-6 col-md-4">
+            <img src="foto4.png" class="img-fluid rounded shadow-sm gallery-img w-100" alt="Galeria 4" onerror="this.src='https://placehold.co/400x400/eee/999?text=foto4.png'">
+          </div>
+          <div class="col-6 col-md-4">
+            <img src="foto5.png" class="img-fluid rounded shadow-sm gallery-img w-100" alt="Galeria 5" onerror="this.src='https://placehold.co/400x400/eee/999?text=foto5.png'">
+          </div>
+          <div class="col-6 col-md-4">
+            <img src="foto6.png" class="img-fluid rounded shadow-sm gallery-img w-100" alt="Galeria 6" onerror="this.src='https://placehold.co/400x400/eee/999?text=foto6.png'">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contato" class="bg-dark-custom text-white pt-0 pb-5">
+      <div class="container-fluid p-0">
+          <!-- Rodapé como Imagem -->
+           <div class="position-relative text-center">
+               <img src="rodape.png" alt="Informações de Contato" class="img-fluid w-100" onerror="this.src='https://placehold.co/1920x400/1A1A1A/D4AF37?text=Rodape+do+Site'">
+               
+               <!-- Botões Sobrepostos (para links funcionarem) -->
+               <div class="position-absolute top-50 start-50 translate-middle w-100">
+                    <button 
+                        id="footer_whatsapp_btn"
+                        class="btn btn-outline-gold btn-lg bg-black bg-opacity-50"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#agendamentoModal">
+                        Chamar no WhatsApp (71) 99251-8952
+                    </button>
+                    <div class="mt-3">
+                        <a href="https://www.instagram.com/lab.elledivas/" target="_blank" class="text-white mx-2 fs-3"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-white mx-2 fs-3"><i class="bi bi-facebook"></i></a>
+                    </div>
+               </div>
+           </div>
+      </div>
+      <div class="container mt-3">
+        <div class="text-center text-secondary small" id="footer_copyright">
+          &copy; 2025 Salão La Belle Divas. Beleza e Tradição desde 2000.
+          <div class="mt-2">
+            <a href="admin.html" class="btn btn-sm btn-gold border-0" title="Acesso Administrativo">
+                <i class="bi bi-lock-fill"></i> Área Administrativa
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Modal de Agendamento -->
+    <div class="modal fade" id="agendamentoModal" tabindex="-1" aria-labelledby="agendamentoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-dark-custom text-white border-0">
+                    <h5 class="modal-title font-playfair text-gold" id="agendamentoModalLabel">Agendar Horário</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bookingForm">
+                        <div class="mb-3">
+                            <label for="clientName" class="form-label">Seu Nome</label>
+                            <input type="text" class="form-control" id="clientName" placeholder="Como gostaria de ser chamada?" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="serviceType" class="form-label">Serviço Desejado</label>
+                            <select class="form-select" id="serviceType" required>
+                                <option value="" selected disabled>Carregando serviços...</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="bookingDate" class="form-label">Data Preferida</label>
+                                <input type="date" class="form-control" id="bookingDate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="bookingTime" class="form-label">Horário / Turno</label>
+                                <select class="form-select" id="bookingTime" required>
+                                    <option value="" selected disabled>Carregando turnos...</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Aviso de Status (Bloqueios, Horários, etc) -->
+                        <div id="bookingFeedback" class="alert alert-warning d-none small py-2" role="alert"></div>
+
+                        <div class="d-grid mt-3">
+                            <button type="submit" class="btn btn-gold">Confirmar Agendamento <i class="bi bi-whatsapp"></i></button>
+                        </div>
+                        <p class="text-muted small text-center mt-2 mb-0">Você será redirecionada para o WhatsApp do salão</p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Sucesso -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+                <div class="modal-header border-0">
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pb-5">
+                    <div class="mb-3 text-success">
+                        <i class="bi bi-check-circle-fill display-1"></i>
+                    </div>
+                    <h3 class="font-playfair text-gold mb-3">Pré-agendamento Realizado!</h3>
+                    <p class="text-muted mb-4">
+                        Sua reserva está <strong>quase pronta</strong>.<br>
+                        Para confirmar, clique no botão abaixo e envie a mensagem pré-preenchida no WhatsApp.
+                    </p>
+                    <a id="btnConfirmWhatsApp" href="#" target="_blank" class="btn btn-success btn-lg px-4 shadow-sm">
+                        <i class="bi bi-whatsapp"></i> Confirmar no WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+
+    <!-- Arquivo de Configuração (Template) -->
+    <script src="config.js"></script>
+    <!-- Lógica Principal -->
+    <script src="script.js"></script>
+  </body>
+</html>

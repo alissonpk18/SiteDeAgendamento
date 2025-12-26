@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Painel de Controle</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --color-gold: #D4AF37;
+            --color-black: #1A1A1A;
+            --color-white: #FFFFFF;
+            --color-pale-pink: #FADADD;
+        }
+        body { background-color: #f4f6f9; font-family: 'Outfit', sans-serif; }
+        .bg-dark-custom { background-color: var(--color-black) !important; color: white; }
+        .text-gold { color: var(--color-gold) !important; }
+        .btn-gold {
+            background-color: var(--color-gold);
+            color: #fff;
+            border: none;
+        }
+        .btn-gold:hover { background-color: #bfa030; color: white; }
+        
+        .card-dashboard {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .card-dashboard:hover { transform: translateY(-2px); }
+        
+        /* Sidebar Link State */
+        .list-group-item.active {
+            background-color: rgba(212, 175, 55, 0.2) !important;
+            border-left: 4px solid var(--color-gold) !important;
+            color: var(--color-white) !important;
+        }
+        
+        /* Views Utility */
+        .admin-view { display: none; }
+        .admin-view.active-view { display: block; animation: fadeIn 0.3s; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Calendar Styles */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+        .calendar-day {
+            min-height: 80px;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #eee;
+            position: relative;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .calendar-day:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            z-index: 2;
+            border-color: var(--color-gold);
+        }
+        .calendar-day-number {
+             font-size: 1.1rem;
+             font-weight: bold;
+             margin-bottom: 4px;
+        }
+        .calendar-day-status {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Estados Visuais do Calendário */
+        .status-blocked {
+            background-color: #ffebee !important;
+            border-color: #ffcdd2 !important;
+        }
+        .status-blocked .calendar-day-number { color: #c62828; }
+        .status-blocked .calendar-day-status { background-color: #c62828; color: white; }
+
+        .status-modified {
+            background-color: #fff8e1 !important;
+            border-color: #ffecb3 !important;
+        }
+        .status-modified .calendar-day-number { color: #f57f17; }
+        .status-modified .calendar-day-status { background-color: #f57f17; color: white; }
+
+        .status-normal {
+            /* Padrão */
+        }
+        
+        .calendar-day.empty {
+            background-color: transparent !important;
+            border: none;
+            cursor: default;
+            pointer-events: none;
+        }
+        .calendar-header {
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        /* Login Overlay */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--color-black);
+            z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login Overlay -->
+    <div id="loginOverlay">
+        <div class="card p-5 text-center shadow-lg" style="max-width: 400px; width: 90%;">
+            <div class="mb-4">
+                <i class="fas fa-lock fa-3x text-gold"></i>
+            </div>
+            <h3 class="font-playfair mb-2">Acesso Restrito</h3>
+            <p class="text-muted small mb-4">Área exclusiva para administração</p>
+            <div class="mb-3">
+                <input type="password" id="adminPass" class="form-control text-center form-control-lg" placeholder="Digite a Senha">
+            </div>
+            <button onclick="checkLogin()" class="btn btn-gold w-100 py-2">Entrar no Painel</button>
+            <p id="loginError" class="text-danger mt-3 small" style="display:none;"><i class="fas fa-exclamation-circle"></i> Senha incorreta</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="d-flex" id="wrapper" style="display:none !important;">
+        <!-- Sidebar -->
+        <div class="bg-dark-custom min-vh-100 border-end border-secondary position-fixed start-0 top-0" id="sidebar-wrapper" style="width: 260px; z-index: 1000;">
+            <div class="sidebar-heading p-4 border-bottom border-secondary">
+                <h5 class="font-playfair text-gold fw-bold mb-0"><i class="fas fa-spa me-2"></i> La Belle Divas</h5>
+                <small class="text-muted">Painel Administrativo</small>
+            </div>
+            <div class="list-group list-group-flush pt-3">
+                <a href="#" onclick="switchView('dashboard')" id="nav-dashboard" class="list-group-item list-group-item-action bg-transparent text-white border-0 py-3 active">
+                    <i class="fas fa-tachometer-alt me-3 text-gold"></i> Dashboard
+                </a>
+                <a href="#" onclick="switchView('agenda')" id="nav-agenda" class="list-group-item list-group-item-action bg-transparent text-white border-0 py-3">
+                    <i class="fas fa-calendar-alt me-3 text-gold"></i> Agenda & Bloqueios
+                </a>
+                <a href="#" onclick="switchView('settings')" id="nav-settings" class="list-group-item list-group-item-action bg-transparent text-white border-0 py-3">
+                    <i class="fas fa-cog me-3 text-gold"></i> Configurações
+                </a>
+                <div class="mt-5 px-3">
+                    <a href="index.html" class="btn btn-outline-light w-100 btn-sm">
+                        <i class="fas fa-external-link-alt me-2"></i> Ver Site
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper" class="w-100" style="margin-left: 260px;">
+            <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-4 py-3 sticky-top shadow-sm">
+                <h4 class="font-playfair mb-0" id="pageTitle">Visão Geral</h4>
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <span id="systemStatus" class="badge rounded-pill bg-secondary">
+                        <i class="fas fa-circle-notch fa-spin me-1"></i> Conectando...
+                    </span>
+                    <div class="vr"></div>
+                    <span class="text-muted small">Olá, <strong>Administrador</strong></span>
+                </div>
+            </nav>
+
+            <div class="container-fluid p-4">
+                
+                <!-- VIEW: DASHBOARD -->
+                <div id="view-dashboard" class="admin-view active-view">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4">
+                            <div class="card card-dashboard p-4 bg-white h-100">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-muted text-uppercase mb-2 small fw-bold">Agendamentos Hoje</h6>
+                                        <h2 class="fw-bold mb-0 display-5" id="todayCount">--</h2>
+                                    </div>
+                                    <div class="bg-light-pink rounded-circle p-3 text-gold shadow-sm">
+                                        <i class="fas fa-calendar-check fa-lg"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-3 text-muted small">
+                                    <i class="fas fa-arrow-up text-success"></i> Atualizado em tempo real
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card card-dashboard p-4 bg-white h-100">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-muted text-uppercase mb-2 small fw-bold">Status do Sistema</h6>
+                                        <h2 class="fw-bold mb-0 text-success display-6">Online</h2>
+                                    </div>
+                                    <div class="bg-light rounded-circle p-3 text-success shadow-sm">
+                                        <i class="fas fa-wifi fa-lg"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-3 text-muted small">
+                                    Conectado ao Google Sheets
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 font-playfair"><i class="fas fa-clock text-gold me-2"></i> Agendamentos de Hoje</h5>
+                            <span class="badge bg-light text-dark border" id="todayDateDisplay">--/--</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-4">Horário</th>
+                                            <th>Cliente</th>
+                                            <th>Serviço</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="appointmentsList">
+                                        <tr>
+                                            <td colspan="4" class="text-center py-4 text-muted">
+                                                <i class="fas fa-spinner fa-spin me-2"></i> Carregando agendamentos...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info border-0 shadow-sm">
+                        <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i> Bem-vindo!</h5>
+                        <p class="mb-0">Utilize o menu lateral para gerenciar sua agenda e configurações. Para bloquear dias ou alterar horários, acesse o menu <strong>Agenda</strong>.</p>
+                    </div>
+                </div>
+
+                <!-- VIEW: AGENDA (Blocking & Calendar) -->
+                <div id="view-agenda" class="admin-view">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 font-playfair"><i class="fas fa-calendar-alt text-gold me-2"></i> Gestão de Datas</h5>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                                <span id="currentMonthLabel" class="fw-bold fs-5" style="min-width: 150px; text-align: center;">...</span>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-light border small text-center mb-4">
+                                <i class="fas fa-mouse-pointer text-gold"></i> Clique em um dia para configurar <strong>Bloqueios</strong> ou <strong>Horários Especiais</strong>.
+                            </div>
+                            
+                            <div class="calendar-grid" id="calendarGrid">
+                                <!-- Grid Rendered by JS -->
+                            </div>
+
+                            <div class="mt-4 d-flex gap-4 justify-content-center border-top pt-3">
+                                <div class="d-flex align-items-center small">
+                                    <span class="d-inline-block rounded-circle me-2" style="width: 12px; height: 12px; background-color: #fff; border: 1px solid #ccc;"></span>
+                                    <span>Normal</span>
+                                </div>
+                                <div class="d-flex align-items-center small">
+                                    <span class="d-inline-block rounded-circle me-2" style="width: 12px; height: 12px; background-color: #f57f17;"></span>
+                                    <span>Horário Modificado</span>
+                                </div>
+                                <div class="d-flex align-items-center small">
+                                    <span class="d-inline-block rounded-circle me-2" style="width: 12px; height: 12px; background-color: #c62828;"></span>
+                                    <span>Bloqueado</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista Rápida de Bloqueios (Opcional, pode remover se preferir só o calendário) -->
+                    <div class="mt-4">
+                         <div class="accordion" id="accordionBlocked">
+                             <div class="accordion-item border-0 shadow-sm">
+                                <h2 class="accordion-header">
+                                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                    <i class="fas fa-list me-2"></i> Ver Lista de Dias Bloqueados/Modificados
+                                  </button>
+                                </h2>
+                                <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionBlocked">
+                                  <div class="accordion-body">
+                                      <ul class="list-group list-group-flush" id="blockedDatesList">
+                                          <!-- Lista preenchida via JS -->
+                                      </ul>
+                                  </div>
+                                </div>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: SETTINGS -->
+                <div id="view-settings" class="admin-view">
+                     <div class="row justify-content-center">
+                         <div class="col-lg-8">
+                             
+                             <!-- Configuração de Horários (Weekly Schedule) -->
+                             <div class="card border-0 shadow-sm mb-4">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0 font-playfair"><i class="fas fa-clock text-gold me-2"></i> Horários de Funcionamento</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div id="weeklyScheduleContainer">
+                                        <!-- Gerado via JS para evitar repetição -->
+                                    </div>
+                                </div>
+                             </div>
+
+                             <!-- Configuração de Perfil -->
+                             <div class="card border-0 shadow-sm mb-4">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0 font-playfair"><i class="fas fa-user-shield text-gold me-2"></i> Perfil Administrativo</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Nome de Exibição</label>
+                                            <input type="text" class="form-control" id="adminNameInput" placeholder="Ex: Administrador">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Alterar Senha de Acesso</label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control" id="adminPassInput" placeholder="Nova senha (opcional)">
+                                                <button class="btn btn-outline-secondary" type="button" onclick="const i=document.getElementById('adminPassInput'); i.type = i.type==='password'?'text':'password';">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                            <div class="form-text small">Deixe em branco para manter a senha atual.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                             </div>
+
+                             <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0 font-playfair"><i class="fas fa-sliders-h text-gold me-2"></i> Configurações Gerais</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <form id="settingsForm">
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold">Limite de Atendimentos Diários</label>
+                                            <div class="input-group input-group-lg">
+                                                <span class="input-group-text bg-light"><i class="fas fa-users"></i></span>
+                                                <input type="number" class="form-control" id="dailyLimitInput" value="10">
+                                            </div>
+                                            <div class="form-text mt-2"><i class="fas fa-info-circle text-primary"></i> Isso define quantos agendamentos o sistema aceita antes de mostrar o dia como "Lotado".</div>
+                                        </div>
+                                        
+                                        <hr class="my-4">
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold mb-3">Conexão com Banco de Dados</label>
+                                            <div class="alert alert-success border d-flex align-items-center">
+                                                <i class="fab fa-google-drive fa-2x me-3"></i>
+                                                <div>
+                                                    <strong>Google Sheets Integrado</strong>
+                                                    <div class="small">Todos os dados são salvos automaticamente na sua planilha.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-gold btn-lg">
+                                                <i class="fas fa-save me-2"></i> Salvar Todas as Configurações
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                             </div>
+                         </div>
+                     </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Modal de Configuração do Dia -->
+    <div class="modal fade" id="modalConfigDia" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title font-playfair fw-bold">
+                        <i class="fas fa-edit text-gold me-2"></i> Configurar Dia
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="text-center mb-4">
+                        <h4 id="modalDateDisplay" class="fw-bold">--/--/----</h4>
+                        <p class="text-muted small">Selecione o estado para este dia</p>
+                    </div>
+
+                    <input type="hidden" id="selectedDateInput">
+                    <input type="hidden" id="selectedConfigType" value="normal">
+                    
+                    <div class="row g-2 mb-4">
+                        <div class="col-4">
+                            <button type="button" class="btn btn-outline-secondary w-100 py-3 h-100" id="btnOptionNormal" onclick="selectConfigOption('normal')">
+                                <i class="fas fa-check-circle fa-2x mb-2 d-block"></i>
+                                Normal
+                            </button>
+                        </div>
+                        <div class="col-4">
+                            <button type="button" class="btn btn-outline-warning w-100 py-3 h-100 text-dark" id="btnOptionModified" onclick="selectConfigOption('modified')">
+                                <i class="fas fa-clock fa-2x mb-2 d-block"></i>
+                                Horário
+                            </button>
+                        </div>
+                        <div class="col-4">
+                            <button type="button" class="btn btn-outline-danger w-100 py-3 h-100" id="btnOptionBlocked" onclick="selectConfigOption('blocked')">
+                                <i class="fas fa-ban fa-2x mb-2 d-block"></i>
+                                Bloquear
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Seção Horário Modificado -->
+                    <div id="sectionModified" class="config-section d-none bg-light p-3 rounded mb-3">
+                        <h6 class="text-warning text-dark fw-bold mb-3"><i class="fas fa-clock"></i> Definir Horário Personalizado</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Início</label>
+                                <input type="time" id="modifiedStart" class="form-control">
+                            </div>
+
+
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Fim</label>
+                                <input type="time" id="modifiedEnd" class="form-control">
+                            </div>
+                            <div class="col-12 mt-2">
+                                <label class="form-label small fw-bold">Motivo / Observação</label>
+                                <input type="text" id="modifiedReason" class="form-control" placeholder="Ex: Sábado especial">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção Bloqueio -->
+                    <div id="sectionBlocked" class="config-section d-none bg-danger-subtle p-3 rounded mb-3">
+                        <h6 class="text-danger fw-bold mb-3"><i class="fas fa-ban"></i> Configurar Bloqueio</h6>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Motivo do Bloqueio</label>
+                            <input type="text" id="blockedReason" class="form-control" placeholder="Ex: Feriado, Folga...">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-gold px-5" onclick="saveDayConfig()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Agendamento -->
+    <div class="modal fade" id="modalEditAppointment" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title font-playfair fw-bold">
+                        <i class="fas fa-edit text-gold me-2"></i> Editar Agendamento
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="editAppId">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cliente</label>
+                        <input type="text" class="form-control" id="editClientName">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Serviço</label>
+                        <input type="text" class="form-control" id="editServiceName">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Status</label>
+                        <select class="form-select" id="editStatus">
+                            <option value="Pendente via WhatsApp">Pendente</option>
+                            <option value="Confirmado">Confirmado</option>
+                            <option value="Concluído">Concluído</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-gold" onclick="saveAppointmentChange()">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const API_URL = Config.API_URL;
+        const DEFAULT_LIMIT = Config.DEFAULT_DAILY_LIMIT;
+        
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth();
+        let globalDayConfigs = {}; 
+        let globalBlockedDates = [];
+        let modalBootstrapInstance = null;
+
+        // --- WEEKLY SCHEDULE LOGIC ---
+        const weekDays = [
+            { id: 'dom', label: 'Domingo' },
+            { id: 'seg', label: 'Segunda-feira' },
+            { id: 'ter', label: 'Terça-feira' },
+            { id: 'qua', label: 'Quarta-feira' },
+            { id: 'qui', label: 'Quinta-feira' },
+            { id: 'sex', label: 'Sexta-feira' },
+            { id: 'sab', label: 'Sábado' }
+        ];
+
+        function renderWeeklySchedule() {
+            const container = document.getElementById('weeklyScheduleContainer');
+            container.innerHTML = '';
+
+            weekDays.forEach(day => {
+                const row = document.createElement('div');
+                row.className = 'd-flex align-items-center justify-content-between mb-3 border-bottom pb-2';
+                row.innerHTML = `
+                    <div class="d-flex align-items-center" style="width: 150px;">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="check_${day.id}" onchange="toggleDayInputs('${day.id}')" checked>
+                            <label class="form-check-label fw-bold" for="check_${day.id}">${day.label}</label>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 align-items-center" id="inputs_${day.id}">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">Abre</span>
+                            <input type="time" class="form-control" id="start_${day.id}" value="08:00">
+                        </div>
+                        <span class="text-muted">-</span>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">Fecha</span>
+                            <input type="time" class="form-control" id="end_${day.id}" value="18:00">
+                        </div>
+                    </div>
+                    <div id="closed_${day.id}" class="text-muted small fst-italic d-none ms-auto">
+                        Fechado
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function toggleDayInputs(dayId) {
+            const isChecked = document.getElementById(`check_${dayId}`).checked;
+            const inputs = document.getElementById(`inputs_${dayId}`);
+            const label = document.getElementById(`closed_${dayId}`);
+            
+            if (isChecked) {
+                inputs.classList.remove('d-none');
+                inputs.classList.add('d-flex');
+                label.classList.add('d-none');
+            } else {
+                inputs.classList.add('d-none');
+                inputs.classList.remove('d-flex');
+                label.classList.remove('d-none');
+            }
+        }
+
+        // --- NAVIGATION LOGIC ---
+        function switchView(viewName) {
+            // Hide all views
+            document.querySelectorAll('.admin-view').forEach(el => el.classList.remove('active-view'));
+            // Remove active class from navs
+            document.querySelectorAll('.list-group-item').forEach(el => el.classList.remove('active'));
+            
+            // Show selected view
+            document.querySelector(`#view-${viewName}`).classList.add('active-view');
+            // Activate nav
+            document.querySelector(`#nav-${viewName}`).classList.add('active');
+            
+            // Update Title
+            const titles = {
+                'dashboard': 'Visão Geral',
+                'agenda': 'Agenda & Bloqueios',
+                'settings': 'Configurações'
+            };
+            document.getElementById('pageTitle').innerText = titles[viewName];
+        }
+
+        async function checkLogin() {
+            const passInput = document.getElementById('adminPass');
+            const pass = passInput.value;
+            const btn = document.querySelector('button[onclick="checkLogin()"]');
+            const errorMsg = document.getElementById('loginError');
+
+            // Loading State
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+            errorMsg.style.display = 'none';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "checkLogin", password: pass })
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('wrapper').style.display = 'flex';
+                    document.getElementById('wrapper').classList.add('d-flex');
+                    
+                    // Initialize Schedule UI
+                    renderWeeklySchedule();
+                    
+                    loadDashboard();
+                } else {
+                    errorMsg.style.display = 'block';
+                    errorMsg.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${result.message || 'Senha incorreta'}`;
+                }
+            } catch (error) {
+                console.error(error);
+                errorMsg.style.display = 'block';
+                errorMsg.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Erro de conexão. Tente novamente.`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function loadDashboard() {
+            const todayCountEl = document.getElementById('todayCount');
+            const statusEl = document.getElementById('systemStatus');
+
+            todayCountEl.innerHTML = '<span class="text-muted fs-4">...</span>';
+            statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin me-1"></i> Sincronizando...';
+
+            try {
+                const response = await fetch(`${API_URL}?action=adminData`);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    todayCountEl.innerText = data.todayCount || 0;
+                    document.getElementById('dailyLimitInput').value = data.settings.maxPerDay || DEFAULT_LIMIT;
+                    
+                    // Admin Profile
+                    const adminName = data.settings.adminName || 'Administrador';
+                    document.querySelector('.text-muted.small strong').innerText = adminName;
+                    document.getElementById('adminNameInput').value = adminName;
+
+                    // Load Weekly Schedule
+                    if (data.settings.weeklySchedule) {
+                        try {
+                            const schedule = JSON.parse(data.settings.weeklySchedule);
+                            weekDays.forEach(day => {
+                                const dayConfig = schedule[day.id];
+                                if (dayConfig) {
+                                    document.getElementById(`check_${day.id}`).checked = dayConfig.active;
+                                    document.getElementById(`start_${day.id}`).value = dayConfig.start || '08:00';
+                                    document.getElementById(`end_${day.id}`).value = dayConfig.end || '18:00';
+                                } else {
+                                    // Default defaults
+                                    document.getElementById(`check_${day.id}`).checked = false;
+                                }
+                                toggleDayInputs(day.id);
+                            });
+                        } catch (e) {
+                            console.error("Erro ao ler horario semanal", e);
+                        }
+                    }
+
+                    globalBlockedDates = data.blockedDates || [];
+                    // Reset globalDayConfigs
+                    globalDayConfigs = {};
+                    globalBlockedDates.forEach(date => {
+                        globalDayConfigs[date] = { type: 'blocked', reason: 'Bloqueio Manual' };
+                    });
+
+                    // Update List (Legacy/Reference)
+                    renderBlockedList(globalBlockedDates);
+                    
+                    // Render Calendar
+                    renderCalendar(currentMonth, currentYear);
+                    
+                    const today = new Date();
+                    document.getElementById('todayDateDisplay').innerText = today.toLocaleDateString('pt-BR');
+
+                    // Render Appointments List
+                    const listEl = document.getElementById('appointmentsList');
+                    listEl.innerHTML = '';
+                    
+                    if (data.todayAppointments && data.todayAppointments.length > 0) {
+                        data.todayAppointments.forEach(app => {
+                            let statusBadge = '';
+                            if (app.status === 'Confirmado') statusBadge = '<span class="badge bg-success">Confirmado</span>';
+                            else if (app.status === 'Cancelado') statusBadge = '<span class="badge bg-danger">Cancelado</span>';
+                            else statusBadge = '<span class="badge bg-warning text-dark">Pendente</span>';
+
+                            const tr = document.createElement('tr');
+                            tr.style.cursor = 'pointer';
+                            tr.onclick = () => openEditModal(app);
+                            tr.innerHTML = `
+                                <td class="ps-4 fw-bold text-gold">${app.time}</td>
+                                <td>${app.client}</td>
+                                <td>${app.service}</td>
+                                <td>${statusBadge}</td>
+                            `;
+                            listEl.appendChild(tr);
+                        });
+                    } else {
+                        listEl.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="far fa-calendar-times fa-2x mb-3 d-block op-3"></i>
+                                    Nenhum agendamento para hoje.
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    statusEl.className = 'badge rounded-pill bg-success';
+                    statusEl.innerHTML = '<i class="fas fa-wifi me-1"></i> Online';
+                } else {
+                    throw new Error(data.message || 'Erro');
+                }
+            } catch (error) {
+                console.error(error);
+                statusEl.className = 'badge rounded-pill bg-danger';
+                statusEl.innerHTML = 'Desconectado';
+                // alert('Erro na conexão: ' + error.message); 
+            }
+        }
+        
+        // --- EDIT APPOINTMENT LOGIC ---
+        let editModalInstance = null;
+
+        function openEditModal(app) {
+            if (!app) return;
+
+            document.getElementById('editAppId').value = app.id || '';
+            document.getElementById('editClientName').value = app.client || '';
+            document.getElementById('editServiceName').value = app.service || '';
+            
+            let statusVal = app.status || '';
+            if(statusVal.includes('Pendente')) statusVal = 'Pendente via WhatsApp'; 
+            
+            const statusField = document.getElementById('editStatus');
+            if (statusField) statusField.value = statusVal;
+
+            const modalEl = document.getElementById('modalEditAppointment');
+            if (modalEl && typeof bootstrap !== 'undefined') {
+                editModalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (!editModalInstance) {
+                    editModalInstance = new bootstrap.Modal(modalEl);
+                }
+                editModalInstance.show();
+            } else {
+                console.error("Bootstrap or Modal element missing");
+            }
+        }
+
+        async function saveAppointmentChange() {
+            const id = document.getElementById('editAppId').value;
+            const client = document.getElementById('editClientName').value;
+            const service = document.getElementById('editServiceName').value;
+            const status = document.getElementById('editStatus').value;
+            
+            const btn = document.querySelector('button[onclick="saveAppointmentChange()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'updateAppointment',
+                        id: id,
+                        client: client,
+                        service: service,
+                        status: status
+                    })
+                });
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    if(editModalInstance) editModalInstance.hide();
+                    loadDashboard(); // Refresh list
+                    alert('Agendamento atualizado!');
+                } else {
+                    alert('Erro: ' + result.message);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Erro de conexão ao salvar.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // --- CALENDAR LOGIC ---
+        function renderCalendar(month, year) {
+            const grid = document.getElementById('calendarGrid');
+            const label = document.getElementById('currentMonthLabel');
+            grid.innerHTML = '';
+            
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            label.innerText = `${monthNames[month]} ${year}`;
+
+            const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            daysOfWeek.forEach(d => {
+                const div = document.createElement('div');
+                div.className = 'calendar-header';
+                div.innerText = d;
+                grid.appendChild(div);
+            });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for(let i=0; i<firstDay; i++) {
+                const div = document.createElement('div');
+                div.className = 'calendar-day empty';
+                grid.appendChild(div);
+            }
+
+            for(let day=1; day<=daysInMonth; day++) {
+                const div = document.createElement('div');
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                
+                div.className = 'calendar-day';
+                
+                // Content Structure
+                let statusText = "";
+                let statusClass = "status-normal";
+                
+                const config = globalDayConfigs[dateStr];
+                
+                if (config) {
+                    if (config.type === 'blocked') {
+                        statusClass = 'status-blocked';
+                        statusText = 'BLOQUEADO';
+                    } else if (config.type === 'modified') {
+                        statusClass = 'status-modified';
+                        statusText = 'MODIFICADO';
+                    }
+                }
+
+                div.classList.add(statusClass);
+                div.innerHTML = `
+                    <span class="calendar-day-number">${day}</span>
+                    ${statusText ? `<span class="calendar-day-status">${statusText}</span>` : ''}
+                `;
+                
+                div.onclick = () => openDayConfig(dateStr);
+                grid.appendChild(div);
+            }
+        }
+
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if(currentMonth > 11) { currentMonth = 0; currentYear++; }
+            if(currentMonth < 0) { currentMonth = 11; currentYear--; }
+            renderCalendar(currentMonth, currentYear);
+        }
+
+        function renderBlockedList(dates) {
+             const list = document.getElementById('blockedDatesList');
+             if(!list) return;
+             list.innerHTML = '';
+             let sorted = [...dates].sort();
+             sorted.forEach(d => {
+                 const parts = d.split('-');
+                 const li = document.createElement('li');
+                 li.className = 'list-group-item d-flex justify-content-between align-items-center bg-transparent';
+                 li.innerHTML = `<span><i class="fas fa-calendar-times text-danger me-2"></i> ${parts[2]}/${parts[1]}/${parts[0]}</span> <small class="text-muted">Bloqueado</small>`;
+                 list.appendChild(li);
+             });
+        }
+
+        // --- MODAL LOGIC ---
+        function openDayConfig(dateStr) {
+            const parts = dateStr.split('-');
+            const displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`; 
+            
+            document.getElementById('modalDateDisplay').innerText = displayDate;
+            document.getElementById('selectedDateInput').value = dateStr;
+            
+            const existingConfig = globalDayConfigs[dateStr] || { type: 'normal' };
+            selectConfigOption(existingConfig.type);
+            
+            // Clear inputs
+            document.getElementById('modifiedStart').value = '';
+            document.getElementById('modifiedEnd').value = '';
+            document.getElementById('modifiedReason').value = '';
+            document.getElementById('blockedReason').value = '';
+
+            if(existingConfig.type === 'modified') {
+                document.getElementById('modifiedStart').value = existingConfig.start || '';
+                document.getElementById('modifiedEnd').value = existingConfig.end || '';
+                document.getElementById('modifiedReason').value = existingConfig.reason || '';
+            }
+            if(existingConfig.type === 'blocked') {
+                document.getElementById('blockedReason').value = existingConfig.reason || '';
+            }
+
+            const modalEl = document.getElementById('modalConfigDia');
+            modalBootstrapInstance = new bootstrap.Modal(modalEl);
+            modalBootstrapInstance.show();
+        }
+
+        function selectConfigOption(type) {
+            document.getElementById('sectionModified').classList.add('d-none');
+            document.getElementById('sectionBlocked').classList.add('d-none');
+            
+            document.getElementById('btnOptionNormal').classList.remove('active', 'btn-success');
+            document.getElementById('btnOptionModified').classList.remove('active', 'btn-warning');
+            document.getElementById('btnOptionBlocked').classList.remove('active', 'btn-danger'); // Fix: remove color classes if added
+            
+            // Add basic outline classes back if needed, but 'active' implies the filled state in Bootstrap usually
+            // Custom approach:
+            document.getElementById('btnOptionNormal').className = 'btn btn-outline-secondary w-100 py-3 h-100';
+            document.getElementById('btnOptionModified').className = 'btn btn-outline-warning w-100 py-3 h-100 text-dark';
+            document.getElementById('btnOptionBlocked').className = 'btn btn-outline-danger w-100 py-3 h-100';
+
+            document.getElementById('selectedConfigType').value = type;
+
+            if (type === 'normal') {
+                document.getElementById('btnOptionNormal').className = 'btn btn-success w-100 py-3 h-100 text-white shadow';
+            } else if (type === 'modified') {
+                document.getElementById('btnOptionModified').className = 'btn btn-warning w-100 py-3 h-100 text-dark shadow';
+                document.getElementById('sectionModified').classList.remove('d-none');
+            } else if (type === 'blocked') {
+                document.getElementById('btnOptionBlocked').className = 'btn btn-danger w-100 py-3 h-100 text-white shadow';
+                document.getElementById('sectionBlocked').classList.remove('d-none');
+            }
+        }
+
+        async function saveDayConfig() {
+            const dateStr = document.getElementById('selectedDateInput').value;
+            const type = document.getElementById('selectedConfigType').value;
+            
+            const newConfig = {
+                date: dateStr,
+                type: type, 
+                action: 'saveDayConfig'
+            };
+
+            if (type === 'modified') {
+                newConfig.start = document.getElementById('modifiedStart').value;
+                newConfig.end = document.getElementById('modifiedEnd').value;
+                newConfig.reason = document.getElementById('modifiedReason').value;
+                if(!newConfig.start || !newConfig.end) return alert('Horários são obrigatórios.');
+            } else if (type === 'blocked') {
+                newConfig.reason = document.getElementById('blockedReason').value;
+                if(!newConfig.reason) return alert('Motivo é obrigatório.');
+            }
+
+            const saveBtn = document.querySelector('#modalConfigDia .btn-gold');
+            const originalText = saveBtn.innerText;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                // Local Update
+                globalDayConfigs[dateStr] = newConfig;
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(newConfig)
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    if(modalBootstrapInstance) modalBootstrapInstance.hide();
+                    renderCalendar(currentMonth, currentYear);
+                } else {
+                    alert('Erro no servidor: ' + result.message);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Erro de conexão.');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerText = originalText;
+            }
+        }
+        
+        // --- SETTINGS FORM ---
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const limit = document.getElementById('dailyLimitInput').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            
+            // Gather Weekly Schedule
+            const schedule = {};
+            weekDays.forEach(day => {
+                schedule[day.id] = {
+                    active: document.getElementById(`check_${day.id}`).checked,
+                    start: document.getElementById(`start_${day.id}`).value,
+                    end: document.getElementById(`end_${day.id}`).value
+                };
+            });
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'updateSettings',
+                        limit: limit,
+                        weeklySchedule: JSON.stringify(schedule), // Send as JSON string
+                        adminName: document.getElementById('adminNameInput').value,
+                        adminPassword: document.getElementById('adminPassInput').value
+                    })
+                });
+                const result = await response.json();
+                if(result.status === 'success') {
+                    alert('Configurações salvas!');
+                } else {
+                    alert('Erro: ' + result.message);
+                }
+            } catch (e) {
+                alert('Erro de conexão.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        });
+    </script>
+</body>
+</html>
