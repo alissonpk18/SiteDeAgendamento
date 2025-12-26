@@ -1,0 +1,122 @@
+/* Variáveis de Cor */
+:root {
+  --color-gold: #d4af37;
+  --color-black: #1a1a1a;
+  --color-white: #ffffff;
+  --color-pale-pink: #fadadd;
+  --font-playfair: "Playfair Display", serif;
+  --font-outfit: "Outfit", sans-serif;
+}
+
+/* Base Styles */
+body {
+  font-family: var(--font-outfit);
+  color: var(--color-black);
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+.font-playfair {
+  font-family: var(--font-playfair);
+}
+
+.text-gold {
+  color: var(--color-gold) !important;
+}
+.bg-dark-custom {
+  background-color: var(--color-black) !important;
+}
+.bg-light-pink {
+  background-color: var(--color-pale-pink) !important;
+}
+
+/* Navbar */
+.navbar {
+  transition: all 0.3s ease;
+  padding: 1rem 0;
+}
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.nav-link {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 300;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+.nav-link.active,
+.nav-link:hover {
+  color: var(--color-gold) !important;
+}
+
+/* Hero Section */
+.hero-section {
+  height: 100vh;
+  min-height: 600px;
+  background-color: #000; /* Fallback color */
+  position: relative;
+}
+
+/* Buttons */
+.btn-gold {
+  background-color: var(--color-gold);
+  color: #fff;
+  border: 2px solid var(--color-gold);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+}
+.btn-gold:hover {
+  background-color: transparent;
+  color: var(--color-gold);
+}
+.btn-outline-gold {
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold);
+}
+.btn-outline-gold:hover {
+  background-color: var(--color-gold);
+  color: #fff;
+}
+
+/* Sections */
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+.separator-gold {
+  width: 60px;
+  height: 3px;
+  background-color: var(--color-gold);
+  margin-top: 1rem;
+}
+
+/* Service Cards */
+.service-card {
+  transition: transform 0.3s ease;
+}
+.service-card:hover {
+  transform: translateY(-5px);
+}
+.service-card .card-img-top {
+  height: 250px;
+  object-fit: cover;
+}
+
+/* Gallery */
+.gallery-img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  transition: opacity 0.3s;
+}
+.gallery-img:hover {
+  opacity: 0.9;
+}
